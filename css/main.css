@@ -10,6 +10,9 @@
   position: absolute;
 }
 
+#token_five {
+  opacity: 0;
+}
 
 button {
   margin-top: 100px;
