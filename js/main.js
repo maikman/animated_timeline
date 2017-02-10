@@ -1,46 +1,49 @@
 $( document ).ready(function() {
   var visible_tokens = [];
-  var max_visible_tokens = 4;
   var token_min_size = 64;
   var token_max_size = 128;
 
   var start_x = 1460;
-  var position_1 = start_x * 0.116;
-  var position_2 = start_x * 0.517;
-  var position_3 = start_x * 0.819;
-  var position_4 = start_x * 0.881;
+  var points = {
+    1:{top: 768, left: 162},
+    2:{top: 642, left: 720},
+    3:{top: 476, left: 1187},
+    4:{top: 148, left: 1460}
+  }
 
   var duration_time = 5000;
   var token_delay_time = 900;
 
-  var bezier_params = {
-      start: {
-        x: start_x,
-        y: 100,
-        angle: 20,
-        length: 0.3
-      },
-      end: {
-        x:60,
-        y:670,
-        angle: 18,
-        length: 1.15
-      }
-    }
+  var arc_1 = {
+    center: [285,185],
+        radius: 100,
+        start: 1460,
+        end: 200,
+        dir: -1
+  }
 
 //create tokens
-for (i = 0; i < max_visible_tokens; i++) {
+$('#start').click(function() {
+jQuery.each(points, function(index) {
+  var tokenId = "#token" + index;
     $('<img />', {
-          id: 'token' + i,
+          id: tokenId,
           class: 'tokens',
           src: 'img/cruise_ship.png'
         }).appendTo('.container');
-}
 
-$('#start').click(function() {
-  for (i = 0; i < max_visible_tokens; i++) {
+$(tokenId).css({ top: this.top + 'px', left: this.left + 'px' });
+  resizeToken(tokenId, this.left);
+});
+
+
+
+
+
+  //$("#token1").animate(point_1, 1000);
+  /*for (i = 0; i < max_visible_tokens; i++) {
     animateToken(i);
-  }
+  }*/
 });
 
   function animateToken(i) {
@@ -85,18 +88,5 @@ $('#start').click(function() {
     var size = getSize(pos);
     $(tokenId).height(size);
     $(tokenId).width(size);
-  }
-
-  function stopAtPosition(tokenId, pos) {
-    switch (true) {
-      case ("#token" + 0 == tokenId && pos <= position_1) :
-         $(tokenId).stop();
-      case ("#token" + 1 == tokenId && pos <= position_2) :
-         $(tokenId).stop();
-      case ("#token" + 2 == tokenId && pos <= position_3) :
-         $(tokenId).stop();
-      case ("#token" + 3 == tokenId && pos <= position_4) :
-         $(tokenId).stop();
-   }
   }
 });
