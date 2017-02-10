@@ -5,34 +5,27 @@ $( document ).ready(function() {
 
   var start_x = 1460;
   var points = {
-    1:{top: 768, left: 162},
-    2:{top: 642, left: 720},
-    3:{top: 476, left: 1187},
-    4:{top: 148, left: 1460}
+    one:   {top: 760, left: 162},
+    two:   {top: 632, left: 720},
+    three: {top: 464, left: 1187},
+    four:  {top: 138, left: 1460}
   }
 
-  var duration_time = 5000;
+  var duration_time = 1000;
   var token_delay_time = 900;
 
-  var arc_1 = {
-    center: [285,185],
-        radius: 100,
-        start: 1460,
-        end: 200,
-        dir: -1
-  }
+
 
 //create tokens
 jQuery.each(points, function(index) {
-  var tokenId = "#token" + index;
+  var tokenId = "#token_" + index;
     $('<img />', {
-          id: tokenId,
+          id: "token_" + index,
           class: 'tokens',
           src: 'img/cruise_ship.png'
         }).appendTo('.container');
-        $(tokenId).hide();
-  $(tokenId).css({ top: this.top + 'px', left: this.left + 'px' });
-  resizeToken(tokenId, this.left);
+
+        positionAndResizeToken(tokenId, this);
 });
 
 
@@ -40,38 +33,66 @@ jQuery.each(points, function(index) {
 
 
 $('#start').click(function() {
-  //$("#token1").animate(point_1, 1000);
-  /*for (i = 0; i < max_visible_tokens; i++) {
-    animateToken(i);
-  }*/
+  jQuery.each(points, function(index) {
+    animateToken(index);
+  });
 });
 
   function animateToken(i) {
-    var tokenId = "#token" + i;
-    var delayTime = token_delay_time * i;
+    var tokenId = "#token_" + i;
 
-    $(tokenId).delay(delayTime).animate({path : new $.path.bezier(bezier_params)},
+  if (i == "one") {
+      $(tokenId).animate({left: "-=500", top: "+=50"}, duration_time);
+  }
+
+  if (i == "two") {
+    var centerPosition = calculatePosition(points.one);
+    $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
+      {
+        step: function(now, fx) {
+            resizeToken(tokenId)
+        },
+        duration: duration_time
+    });
+  }
+
+  if (i == "three") {
+    var centerPosition = calculatePosition(points.two);
+    $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
+      {
+        step: function(now, fx) {
+            resizeToken(tokenId)
+        },
+        duration: duration_time
+    });
+  }
+
+  if (i == "four") {
+    var bezier = {
+      center: [100,100],
+          radius: 250,
+          start: 180,
+          end: 190,
+          dir: 1
+    }
+    var centerPosition = calculatePosition(points.three);
+    $(tokenId).animate({path : new $.path.bezier(bezier)},
+      {
+        step: function(now, fx) {
+            resizeToken(tokenId)
+        },
+        duration: duration_time
+    });
+  }
+
+    /*$(tokenId).animate({path : new $.path.arc(arc_1)},
     {
         step: function(now, fx) {
-            $(tokenId).show();
-            var pos = $(tokenId).position();
 
-            resizeToken(tokenId, pos.left);
-            hideToken(tokenId, pos.left);
-
-            stopAtPosition(tokenId, pos.left);
-
-            $('#forward').click(function() {
-              $(tokenId).animate();
-            });
-
-            /*$('#stop').click(function() {
-              $(tokenId).stop();
-            });*/
         },
         duration: duration_time
     }
-   );
+  );*/
   }
 
   function getSize(pos) {
@@ -84,9 +105,24 @@ $('#start').click(function() {
     }
   }
 
-  function resizeToken(tokenId, pos) {
-    var size = getSize(pos);
-    $(tokenId).height(size);
-    $(tokenId).width(size);
+  function positionAndResizeToken(tokenId, pos) {
+    var size = getSize(pos.left);
+    var left = pos.left - size / 2;
+    var top = pos.top - size / 2;
+    $(tokenId).css({ top: top + 'px', left: left + 'px' }).height(size).width(size);
+  }
+
+  function calculatePosition(point) {
+    var size = getSize(point.left);
+    var left = point.left - size / 2;
+    var top = point.top - size / 2;
+
+    return {left: left, top: top};
+  }
+
+  function resizeToken(tokenId) {
+    pos = $(tokenId).position();
+    var size = getSize(pos.left);
+    $(tokenId).height(size).width(size);
   }
 });
