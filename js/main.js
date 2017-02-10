@@ -23,7 +23,6 @@ $( document ).ready(function() {
   }
 
 //create tokens
-$('#start').click(function() {
 jQuery.each(points, function(index) {
   var tokenId = "#token" + index;
     $('<img />', {
@@ -31,8 +30,8 @@ jQuery.each(points, function(index) {
           class: 'tokens',
           src: 'img/cruise_ship.png'
         }).appendTo('.container');
-
-$(tokenId).css({ top: this.top + 'px', left: this.left + 'px' });
+        $(tokenId).hide();
+  $(tokenId).css({ top: this.top + 'px', left: this.left + 'px' });
   resizeToken(tokenId, this.left);
 });
 
@@ -40,6 +39,7 @@ $(tokenId).css({ top: this.top + 'px', left: this.left + 'px' });
 
 
 
+$('#start').click(function() {
   //$("#token1").animate(point_1, 1000);
   /*for (i = 0; i < max_visible_tokens; i++) {
     animateToken(i);
