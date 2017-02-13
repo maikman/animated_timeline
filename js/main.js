@@ -7,6 +7,7 @@ $( document ).ready(function() {
 
   // TODO: aggregate dynamic values here
   var points = {
+    zero:  {left: -338, top: 810},
     one:   {top: 760, left: 162},
     two:   {top: 632, left: 720},
     three: {top: 464, left: 1187},
@@ -19,35 +20,53 @@ $( document ).ready(function() {
 //create tokens
 jQuery.each(points, function(index) {
   var tokenId = getSelector(index);
-    $('<img />', {
-          id: "token_" + index,
-          class: 'tokens',
-          src: 'img/cruise_ship.png'
-        }).appendTo('.container');
+  $('<img />', {
+        id: "token_" + index,
+        class: 'tokens',
+        src: 'img/cruise_ship.png'
+      }).appendTo('.container');
 
-        positionAndResizeToken(tokenId, this);
+      positionAndResizeToken(tokenId, this);
 });
 
 
 $('#forward').click(function() {
-  jQuery.each(points, function(index) {
-    animateToken(index);
-  });
- $(this).prop('disabled',true);
- setTimeout(function(){
-  $('#forward').removeAttr('disabled');
-}, duration_time);
+    jQuery.each(points, function(index) {
+      animateForward(index);
+    });
 
-  addNewToken();
+   $(this).prop('disabled',true);
+   setTimeout(function(){
+    $('#forward').removeAttr('disabled');
+  }, duration_time);
+
+    addNewEndToken();
 });
 
-  function animateToken(i) {
+$('#backward').click(function() {
+    jQuery.each(points, function(index) {
+      animateBackward(index);
+    });
+
+   $(this).prop('disabled',true);
+   setTimeout(function(){
+    $('#backward').removeAttr('disabled');
+  }, duration_time);
+
+    addNewFrontToken();
+});
+
+  function animateForward(i) {
     var tokenId = getSelector(i);
+
+    if (i == "zero") {
+        $(tokenId).remove();
+    }
 
     if (i == "one") {
         $(tokenId).animate({left: "-=500", top: "+=50"},{
           complete: function() {
-              $(tokenId).delay(duration_time).remove();
+              $(tokenId).attr("id", "token_zero");
           },
           duration: duration_time
       });
@@ -127,6 +146,104 @@ $('#forward').click(function() {
     }
   }
 
+  function animateBackward(i) {
+    var tokenId = getSelector(i);
+
+    if (i == "zero") {
+      var centerPosition = calculatePosition(points.one);
+      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
+        {
+          step: function(now, fx) {
+              resizeToken(tokenId);
+              adjustOpacity(tokenId);
+          },
+          complete: function() {
+              $(tokenId).attr("id", "token_one");
+          },
+          duration: duration_time
+      });
+    }
+
+    if (i == "one") {
+      var centerPosition = calculatePosition(points.two);
+      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
+        {
+          step: function(now, fx) {
+              resizeToken(tokenId);
+              adjustOpacity(tokenId);
+          },
+          complete: function() {
+              $(tokenId).attr("id", "token_two");
+          },
+          duration: duration_time
+      });
+    }
+
+    if (i == "two") {
+      var centerPosition = calculatePosition(points.three);
+      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
+        {
+          step: function(now, fx) {
+              resizeToken(tokenId);
+              adjustOpacity(tokenId);
+          },
+          complete: function() {
+              $(tokenId).attr("id", "token_three");
+          },
+          duration: duration_time
+      });
+    }
+
+    if (i == "three") {
+      var centerPositionStart = calculatePosition(points.three);
+      var centerPositionEnd = calculatePosition(points.four);
+      var bezier = {
+          start: {
+            x: centerPositionStart.left,
+            y: centerPositionStart.top,
+            angle: 18,
+          },
+          end: {
+            x:centerPositionEnd.left,
+            y:centerPositionEnd.top,
+            angle: 50,
+            length: 0.5,
+          }
+        }
+      $(tokenId).animate({path : new $.path.bezier(bezier)},
+        {
+          step: function(now, fx) {
+              resizeToken(tokenId);
+              adjustOpacity(tokenId);
+          },
+          complete: function() {
+              $(tokenId).attr("id", "token_four");
+          },
+          duration: duration_time
+      });
+    }
+
+
+    if (i == "four") {
+      var centerPosition = calculatePosition(points.five);
+      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
+        {
+          step: function(now, fx) {
+              resizeToken(tokenId);
+              adjustOpacity(tokenId);
+          },
+          complete: function() {
+            $(tokenId).attr("id", "token_five");
+          },
+          duration: duration_time
+      });
+    }
+
+    if (i == "five") {
+        $(tokenId).remove();
+    }
+  }
+
   function getSize(pos) {
     return Math.floor(((start_x - pos) / start_x) * token_max_size) + token_min_size;
   }
@@ -174,10 +291,8 @@ $('#forward').click(function() {
     return "#token_" + i;
   }
 
-  function addNewToken() {
-    var tokenId = getSelector("four");
+  function addNewEndToken() {
     var hiddenPos = calculatePosition(points.five);
-    var newPos = calculatePosition(points.four);
     var size = getSize(hiddenPos.left);
 
 
@@ -189,15 +304,20 @@ $('#forward').click(function() {
             .css({ top: hiddenPos.top + 'px', left: hiddenPos.left + 'px', opacity: 0 })
             .height(size)
             .width(size);
-            //.animate({left: newPos.left, top: newPos.top}, duration_time);
-            /*.animate({left: newPos.left, top: newPos.top},
-              {
-                step: function(now, fx) {
-                    resizeToken(tokenId)
-                },
-                duration: duration_time
-            });*/
   }
 
+  function addNewFrontToken() {
+    var hiddenPos = calculatePosition(points.zero);
+    var size = getSize(hiddenPos.left);
 
+
+      $('<img />', {
+            id: "token_zero",
+            class: 'tokens',
+            src: 'img/cruise_ship.png'
+          }).prependTo('.container')
+            .css({ top: hiddenPos.top + 'px', left: hiddenPos.left + 'px', opacity: 0 })
+            .height(size)
+            .width(size);
+  }
 });
