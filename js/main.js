@@ -1,5 +1,4 @@
 $( document ).ready(function() {
-  var visible_tokens = [];
   var token_min_size = 64;
   var token_max_size = 128;
 
@@ -12,10 +11,11 @@ $( document ).ready(function() {
     two:   {top: 632, left: 720},
     three: {top: 464, left: 1187},
     four:  {top: 138, left: 1460},
-    five:  {top: 50, left: 1660}
+    five:  {top: 50, left: start_x}
   }
 
   var duration_time = 1000;
+  var runs = 1;
 
 //create tokens
 jQuery.each(points, function(index) {
@@ -31,77 +31,60 @@ jQuery.each(points, function(index) {
 
 
 $('#forward').click(function() {
-    jQuery.each(points, function(index) {
-      animateForward(index);
-    });
-
-   $(this).prop('disabled',true);
-   setTimeout(function(){
-    $('#forward').removeAttr('disabled');
-  }, duration_time);
-
-    addNewEndToken();
+   animateForward();
 });
 
 $('#backward').click(function() {
-    jQuery.each(points, function(index) {
-      animateBackward(index);
-    });
-
-   $(this).prop('disabled',true);
-   setTimeout(function(){
-    $('#backward').removeAttr('disabled');
-  }, duration_time);
-
-    addNewFrontToken();
+    animateBackward();
 });
 
-  function animateForward(i) {
-    var tokenId = getSelector(i);
+$('#multiple_forward').click(function() {
+  animateForward(3);
+});
 
-    if (i == "zero") {
-        $(tokenId).remove();
-    }
+  function animateForward(i = 1) {
 
-    if (i == "one") {
-        $(tokenId).animate({left: "-=500", top: "+=50"},{
+        // token zero
+        $("#token_zero").remove();
+
+
+        //token one
+        $("#token_one").animate({left: "-=500", top: "+=50"},{
           complete: function() {
-              $(tokenId).attr("id", "token_zero");
+              $("#token_one").attr("id", "token_zero");
           },
           duration: duration_time
       });
-    }
 
-    if (i == "two") {
+
+      //token two
       var centerPosition = calculatePosition(points.one);
-      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
+      $("#token_two").animate({left: centerPosition.left, top: centerPosition.top},
         {
           step: function(now, fx) {
-              resizeToken(tokenId)
+              resizeToken("#token_two")
           },
           complete: function() {
-              $(tokenId).attr("id", "token_one");
+              $("#token_two").attr("id", "token_one");
           },
           duration: duration_time
       });
-    }
 
-    if (i == "three") {
+      //token three
       var centerPosition = calculatePosition(points.two);
-      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
+      $("#token_three").animate({left: centerPosition.left, top: centerPosition.top},
         {
           step: function(now, fx) {
-              resizeToken(tokenId);
-              adjustOpacity(tokenId);
+              resizeToken("#token_three");
+              adjustOpacity("#token_three");
           },
           complete: function() {
-              $(tokenId).attr("id", "token_two");
+              $("#token_three").attr("id", "token_two");
           },
           duration: duration_time
       });
-    }
 
-    if (i == "four") {
+      //token four
       var centerPositionStart = calculatePosition(points.four);
       var centerPositionEnd = calculatePosition(points.three);
       var bezier = {
@@ -117,131 +100,138 @@ $('#backward').click(function() {
             angle: 18,
           }
         }
-      $(tokenId).animate({path : new $.path.bezier(bezier)},
+      $("#token_four").animate({path : new $.path.bezier(bezier)},
         {
           step: function(now, fx) {
-              resizeToken(tokenId);
-              adjustOpacity(tokenId);
+              resizeToken("#token_four");
+              adjustOpacity("#token_four");
           },
           complete: function() {
-              $(tokenId).attr("id", "token_three");
+              $("#token_four").attr("id", "token_three");
           },
           duration: duration_time
       });
-    }
 
-    if (i == "five") {
+
+      //token five
       var centerPosition = calculatePosition(points.four);
-      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
+      $("#token_five").animate({left: centerPosition.left, top: centerPosition.top},
         {
           step: function(now, fx) {
-              resizeToken(tokenId);
-              adjustOpacity(tokenId);
+              resizeToken("#token_five");
+              adjustOpacity("#token_five");
           },
           complete: function() {
-              $(tokenId).attr("id", "token_four");
+              $("#token_five").attr("id", "token_four");
+              if (runs < i) {
+                runs++;
+                setTimeout(function(){
+                 animateForward(i);
+               }, 1);
+             }
+             addNewEndToken();
           },
           duration: duration_time
       });
-    }
   }
 
-  function animateBackward(i) {
-    var tokenId = getSelector(i);
+  function animateBackward(i = 1) {
 
-    if (i == "zero") {
-      var centerPosition = calculatePosition(points.one);
-      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
-        {
-          step: function(now, fx) {
-              resizeToken(tokenId);
-              adjustOpacity(tokenId);
-          },
-          complete: function() {
-              $(tokenId).attr("id", "token_one");
-          },
-          duration: duration_time
-      });
-    }
+    // token four
+    var centerPosition = calculatePosition(points.five);
+    $("#token_four").animate({left: centerPosition.left, top: centerPosition.top},
+      {
+        step: function(now, fx) {
+            resizeToken("#token_four");
+            adjustOpacity("#token_four");
+        },
+        complete: function() {
+          $("#token_four").remove();
+        },
+        duration: duration_time
+    });
 
-    if (i == "one") {
-      var centerPosition = calculatePosition(points.two);
-      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
-        {
-          step: function(now, fx) {
-              resizeToken(tokenId);
-              adjustOpacity(tokenId);
-          },
-          complete: function() {
-              $(tokenId).attr("id", "token_two");
-          },
-          duration: duration_time
-      });
-    }
 
-    if (i == "two") {
-      var centerPosition = calculatePosition(points.three);
-      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
-        {
-          step: function(now, fx) {
-              resizeToken(tokenId);
-              adjustOpacity(tokenId);
-          },
-          complete: function() {
-              $(tokenId).attr("id", "token_three");
-          },
-          duration: duration_time
-      });
-    }
-
-    if (i == "three") {
-      var centerPositionStart = calculatePosition(points.three);
-      var centerPositionEnd = calculatePosition(points.four);
-      var bezier = {
-          start: {
-            x: centerPositionStart.left,
-            y: centerPositionStart.top,
-            angle: 18,
-          },
-          end: {
-            x:centerPositionEnd.left,
-            y:centerPositionEnd.top,
-            angle: 50,
-            length: 0.5,
-          }
+    // token three
+    var centerPositionStart = calculatePosition(points.three);
+    var centerPositionEnd = calculatePosition(points.four);
+    var bezier = {
+        start: {
+          x: centerPositionStart.left,
+          y: centerPositionStart.top,
+          angle: 18,
+        },
+        end: {
+          x:centerPositionEnd.left,
+          y:centerPositionEnd.top,
+          angle: 50,
+          length: 0.5,
         }
-      $(tokenId).animate({path : new $.path.bezier(bezier)},
+      }
+    $("#token_three").animate({path : new $.path.bezier(bezier)},
+      {
+        step: function(now, fx) {
+            resizeToken("#token_three");
+            adjustOpacity("#token_three");
+        },
+        complete: function() {
+            $("#token_three").attr("id", "token_four");
+        },
+        duration: duration_time
+    });
+
+
+      // token two
+      var centerPosition = calculatePosition(points.three);
+      $("#token_two").animate({left: centerPosition.left, top: centerPosition.top},
         {
           step: function(now, fx) {
-              resizeToken(tokenId);
-              adjustOpacity(tokenId);
+              resizeToken("#token_two");
+              adjustOpacity("#token_two");
           },
           complete: function() {
-              $(tokenId).attr("id", "token_four");
+              $("#token_two").attr("id", "token_three");
           },
           duration: duration_time
       });
-    }
 
 
-    if (i == "four") {
-      var centerPosition = calculatePosition(points.five);
-      $(tokenId).animate({left: centerPosition.left, top: centerPosition.top},
+      // token one
+      var centerPosition = calculatePosition(points.two);
+      $("#token_one").animate({left: centerPosition.left, top: centerPosition.top},
         {
           step: function(now, fx) {
-              resizeToken(tokenId);
-              adjustOpacity(tokenId);
+              resizeToken("#token_one");
+              adjustOpacity("#token_one");
           },
           complete: function() {
-            $(tokenId).attr("id", "token_five");
+              $("#token_one").attr("id", "token_two");
           },
           duration: duration_time
       });
-    }
 
-    if (i == "five") {
-        $(tokenId).remove();
-    }
+      // token zero
+      var centerPosition = calculatePosition(points.one);
+      $("#token_zero").animate({left: centerPosition.left, top: centerPosition.top},
+        {
+          step: function(now, fx) {
+              resizeToken("#token_zero");
+              adjustOpacity("#token_zero");
+          },
+          complete: function() {
+              $("#token_zero").attr("id", "token_one");
+              if (runs < i) {
+                runs++;
+                setTimeout(function(){
+                 animateBackward();
+               }, 1);
+             }
+              addNewFrontToken();
+          },
+          duration: duration_time
+      });
+
+
   }
 
   function getSize(pos) {
