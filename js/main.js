@@ -1,8 +1,18 @@
 $( document ).ready(function() {
-  var token_min_size = 64;
-  var token_max_size = 128;
 
-  var start_x = 1660;
+  // adjustable variables
+  var token_count = 12;
+  var token_min_size = 64;
+  var token_max_size = 256;
+  var invisible_row_start = 5;
+  var duration_time = 800;
+
+  var container_width = $('.container').width();
+  var start_x = container_width + token_max_size;
+
+  var current_token = 1;
+  var token_counter = 0;
+
 
   // TODO: aggregate dynamic values here
   var points = {
@@ -14,39 +24,46 @@ $( document ).ready(function() {
     five:  {top: 50, left: start_x}
   }
 
-  var duration_time = 1000;
+
   var runs = 1;
+  var distance = 0;
 
-//create tokens
-jQuery.each(points, function(index) {
-  var tokenId = getSelector(index);
-  $('<img />', {
-        id: "token_" + index,
-        class: 'tokens',
-        src: 'img/cruise_ship.png'
-      }).appendTo('.container');
+setInitTokens();
 
-      positionAndResizeToken(tokenId, this);
+$('.moment').click(function() {
+  distance = this.value - current_token;
+  current_token = current_token + distance;
+
+  if (distance > 0) {
+      animateForward(distance);
+  } else if (distance < 0) {
+      token_counter = Math.abs(distance);
+      animateBackward(token_counter);
+  }
+
+  runs = 1;
 });
 
+  //create visible tokens
+  function setInitTokens() {
+    var i = 0;
+    jQuery.each(points, function(index) {
+      var tokenId = getSelector(index);
+      $('<img />', {
+            id: "token_" + index,
+            class: 'tokens',
+            src: 'img/timeline_' + i + '.png'
+          }).appendTo('.container');
 
-$('#forward').click(function() {
-   animateForward();
-});
-
-$('#backward').click(function() {
-    animateBackward();
-});
-
-$('#multiple_forward').click(function() {
-  animateForward(3);
-});
+          positionAndResizeToken(tokenId, this);
+          i++;
+    });
+  }
 
   function animateForward(i = 1) {
 
         // token zero
         $("#token_zero").remove();
-
 
         //token one
         $("#token_one").animate({left: "-=500", top: "+=50"},{
@@ -55,7 +72,6 @@ $('#multiple_forward').click(function() {
           },
           duration: duration_time
       });
-
 
       //token two
       var centerPosition = calculatePosition(points.one);
@@ -101,7 +117,6 @@ $('#multiple_forward').click(function() {
           }
         }
 
-        //token four
       $("#token_four").animate({path : new $.path.bezier(bezier)},
         {
           step: function(now, fx) {
@@ -113,7 +128,6 @@ $('#multiple_forward').click(function() {
           },
           duration: duration_time
       });
-
 
       //token five
       var centerPosition = calculatePosition(points.four);
@@ -153,7 +167,6 @@ $('#multiple_forward').click(function() {
         duration: duration_time
     });
 
-
     // token three
     var centerPositionStart = calculatePosition(points.three);
     var centerPositionEnd = calculatePosition(points.four);
@@ -181,7 +194,6 @@ $('#multiple_forward').click(function() {
         },
         duration: duration_time
     });
-
 
       // token two
       var centerPosition = calculatePosition(points.three);
@@ -225,15 +237,13 @@ $('#multiple_forward').click(function() {
               if (runs < i) {
                 runs++;
                 setTimeout(function(){
-                 animateBackward();
+                 animateBackward(i);
                }, 1);
              }
               addNewFrontToken();
           },
           duration: duration_time
       });
-
-
   }
 
   function getSize(pos) {
@@ -241,8 +251,7 @@ $('#multiple_forward').click(function() {
   }
 
   function getOpacity(pos) {
-
-    return (pos <= $('.container').width()) ? 1 - ((pos - 1000) / 1000) : 0;
+    return (pos <= container_width) ? 1 - ((pos - 1000) / 1000) : 0;
   }
 
   function hideToken(tokenId, pos) {
@@ -287,11 +296,14 @@ $('#multiple_forward').click(function() {
     var hiddenPos = calculatePosition(points.five);
     var size = getSize(hiddenPos.left);
 
+    if (token_counter <= token_count) {
+      token_counter++;
+    }
 
       $('<img />', {
             id: "token_five",
             class: 'tokens',
-            src: 'img/cruise_ship.png'
+            src: 'img/timeline_' + (token_counter + invisible_row_start) + '.png'
           }).appendTo('.container')
             .css({ top: hiddenPos.top + 'px', left: hiddenPos.left + 'px', opacity: 0 })
             .height(size)
@@ -302,11 +314,14 @@ $('#multiple_forward').click(function() {
     var hiddenPos = calculatePosition(points.zero);
     var size = getSize(hiddenPos.left);
 
+    if (token_counter >= 1) {
+      token_counter--;
+    }
 
       $('<img />', {
             id: "token_zero",
             class: 'tokens',
-            src: 'img/cruise_ship.png'
+            src: 'img/timeline_' + token_counter + '.png'
           }).prependTo('.container')
             .css({ top: hiddenPos.top + 'px', left: hiddenPos.left + 'px', opacity: 0 })
             .height(size)

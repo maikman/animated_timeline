@@ -10,6 +10,14 @@
   position: absolute;
 }
 
+.image_repo {
+  display: none;
+}
+
+.buttons {
+  margin-top: 100px
+}
+
 #token_five {
   opacity: 0;
 }
