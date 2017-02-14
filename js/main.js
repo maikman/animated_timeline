@@ -100,6 +100,8 @@ $('#multiple_forward').click(function() {
             angle: 18,
           }
         }
+
+        //token four
       $("#token_four").animate({path : new $.path.bezier(bezier)},
         {
           step: function(now, fx) {
